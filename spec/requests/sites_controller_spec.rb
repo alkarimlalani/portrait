@@ -60,4 +60,12 @@ describe SitesController, 'js api' do
     }.not_to change(Site, :count)
   end
 
+  it 'handles /sites/search with GET' do
+    expect {
+      gt :sites_history, site: {url: 'https://google.com'}, format: :json
+      expect(response).to be_successful
+      expect(response.body).to be_include('"status":"succeeded"')
+    }.not_to change(Site, :count)
+  end
+
 end
