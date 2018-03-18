@@ -6,6 +6,8 @@ class Site < ApplicationRecord
 
   has_one_attached :image
 
+  scope :latest, ->{ order(created_at: :desc) }
+
   after_create :process!
   def process!
     started!
