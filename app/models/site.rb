@@ -14,7 +14,7 @@ class Site < ApplicationRecord
   def process!
     started!
     if file_exists?
-      attach_file get_file
+      attach_file cached_file
     else
       handle generate_png
     end
@@ -33,7 +33,7 @@ class Site < ApplicationRecord
     get_etag.nil? ? false : Site.exists?(etag: @etag)
   end
 
-  def get_file
+  def cached_file
     Site.find_by(etag: get_etag).image.blob
   end
 
