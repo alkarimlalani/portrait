@@ -45,4 +45,8 @@ RSpec.configure do |config|
   def login_as(username)
     @user = users(username)
   end
+
+  def get_site_id
+    JSON.parse(response.body)["site"]["id"]
+  end
 end

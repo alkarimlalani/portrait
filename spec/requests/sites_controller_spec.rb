@@ -75,5 +75,33 @@ describe SitesController, 'js api' do
       expect(response.body).not_to be_include('"status":"succeeded"')
     }.not_to change(Site, :count)
   end
+end
 
+describe SitesController, 'caching' do
+  before do
+    login_as :admin
+    RestClient ||= double
+    response = double
+    @etag = "\"5aa6e194-4229\""
+    allow(response).to receive(:headers).and_return({etag: @etag})
+    allow(RestClient).to receive(:get).and_return(response)
+  end
+
+  it 'creates a portrait when not cached' do
+    pst :sites, site: { url: 'https://basecamp.com' }, format: :json
+    expect(response).to be_successful
+    site = Site.find get_site_id
+    expect(site.etag).to eq(@etag)
+  end
+
+  it 'uses existing image when already cached' do
+    pst :sites, site: { url: 'https://basecamp.com' }, format: :json
+    a = Site.find get_site_id
+    pst :sites, site: { url: 'https://basecamp.com' }, format: :json
+    b = Site.find get_site_id
+    expect(a.etag).to eq(b.etag)
+    expect(a.image.blob.key).to eq(b.image.blob.key)
+    expect(a.image.blob.checksum).to eq(b.image.blob.checksum)
+    expect(a.image.blob.filename).to eq(b.image.blob.filename)
+  end
 end

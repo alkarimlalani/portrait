@@ -1,3 +1,5 @@
+require 'rest-client'
+
 class Site < ApplicationRecord
 
   enum status: %i[submitted started succeeded failed]
@@ -11,15 +13,41 @@ class Site < ApplicationRecord
   after_create :process!
   def process!
     started!
-    handle generate_png
+    if file_exists?
+      attach_file get_file
+    else
+      handle generate_png
+    end
+  end
+
+  after_create :store_etag, if: :succeeded?
+  def store_etag
+    update etag: get_etag
+  end
+
+  def get_etag
+    @etag ||= RestClient.get(url).headers[:etag]
+  end
+
+  def file_exists?
+    get_etag.nil? ? false : Site.exists?(etag: @etag)
+  end
+
+  def get_file
+    Site.find_by(etag: get_etag).image.blob
   end
 
   # Set the png located at path to the image
   def handle(path)
-    File.exist?(path) ? attach(path) : failed!
+    File.exist?(path) ? attach_from_path(path) : failed!
   end
 
-  def attach(path)
+  def attach_file(file)
+    image.attach file
+    succeeded!
+  end
+
+  def attach_from_path(path)
     image.attach io: File.open(path), filename: "#{id}.png", content_type: 'image/png'
     succeeded!
   ensure

@@ -5,6 +5,7 @@ gem 'haml', '5.0.4'
 gem 'jbuilder', '2.7.0'
 gem 'parser', '2.3.3.1'
 gem 'rails', '5.2.0.rc1'
+gem 'rest-client', '2.0.2'
 gem 'sass-rails', '5.0.7'
 gem 'sqlite3', '1.3.13'
 gem 'uglifier', '4.1.6'
@@ -27,5 +28,5 @@ end
 
 group :test do
   gem 'rails-controller-testing', '1.0.2'
-  gem 'simplecov'
+  gem 'simplecov', '0.16.1'
 end
